@@ -1,0 +1,22 @@
+# Database
+backend/tapcoin.db
+backend/tapcoin.db-shm
+backend/tapcoin.db-wal
+
+# Env files
+backend/.env
+bot/.env
+frontend/.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Node
+node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
