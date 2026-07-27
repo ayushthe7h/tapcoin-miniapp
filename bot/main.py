@@ -36,7 +36,12 @@ async def start_handler(message: Message, command: CommandObject):
     ref_code = (command.args or "").strip()
 
     bot_username = BOT_USERNAME or (await bot.get_me()).username
-    direct_link = f"https://t.me/{bot_username}?startapp={ref_code}" if ref_code else f"https://t.me/{bot_username}"
+    # Always use the ?startapp=... form — a plain https://t.me/<bot> link only
+    # opens the chat, it does NOT launch the Mini App. Only the startapp
+    # mechanism does that reliably. When there's no referral code we still
+    # need *some* value here, so we send a harmless sentinel ("app") that the
+    # backend simply won't match to any real referral_code.
+    direct_link = f"https://t.me/{bot_username}?startapp={ref_code or 'app'}"
 
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
