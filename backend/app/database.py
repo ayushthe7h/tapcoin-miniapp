@@ -5,16 +5,17 @@ from sqlalchemy.pool import StaticPool
 
 from app.config import settings
 
-# SQLite via aiosqlite. `check_same_thread` is handled by aiosqlite itself; we don't
-# need a connection pool the way a networked DB would, so StaticPool keeps a single
-# shared connection alive for the lifetime of the app (safe for SQLite's file locking
-# model and avoids "database is locked" issues under the async event loop).
-engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=False,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
+IS_SQLITE = settings.DATABASE_URL.startswith("sqlite")
+
+# SQLite (aiosqlite) needs check_same_thread=False and a single shared connection
+# (StaticPool) to behave under the async event loop — none of that applies to a
+# networked DB like Postgres, which manages its own connection pool.
+_engine_kwargs = {"echo": False}
+if IS_SQLITE:
+    _engine_kwargs["connect_args"] = {"check_same_thread": False}
+    _engine_kwargs["poolclass"] = StaticPool
+
+engine = create_async_engine(settings.DATABASE_URL, **_engine_kwargs)
 
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
@@ -23,13 +24,14 @@ class Base(DeclarativeBase):
     pass
 
 
-@event.listens_for(engine.sync_engine, "connect")
-def _enable_sqlite_pragmas(dbapi_connection, connection_record):
-    """Enforce foreign keys and use WAL mode for better concurrent read/write behavior."""
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON")
-    cursor.execute("PRAGMA journal_mode=WAL")
-    cursor.close()
+if IS_SQLITE:
+    @event.listens_for(engine.sync_engine, "connect")
+    def _enable_sqlite_pragmas(dbapi_connection, connection_record):
+        """Enforce foreign keys and use WAL mode for better concurrent read/write behavior."""
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.close()
 
 
 async def get_db():
@@ -39,15 +41,25 @@ async def get_db():
 
 async def init_db():
     """
-    Creates tapcoin.db (if it doesn't exist yet) and all tables on it.
-    Runs automatically on app startup — see main.py's startup event.
-    For schema changes after the first launch, prefer Alembic migrations
+    Creates all tables if they don't exist yet (on SQLite, this also creates the
+    tapcoin.db file). Runs automatically on app startup — see main.py's startup
+    event. For schema changes after the first launch, prefer Alembic migrations
     over relying on create_all in a real production rollout.
+
+    IMPORTANT (Render / any host with an ephemeral filesystem): SQLite is a
+    single on-disk file, so if DATABASE_URL points at sqlite and the platform
+    wipes the filesystem on every deploy/restart, every user's data — energy,
+    balance, everything — resets too. Point DATABASE_URL at a real Postgres
+    instance (e.g. Render's managed Postgres) for anything persistent.
     """
     async with engine.begin() as conn:
         from app import models  # noqa: F401  (ensure models are registered before create_all)
         await conn.run_sync(Base.metadata.create_all)
-        await conn.run_sync(_run_lightweight_migrations)
+        if IS_SQLITE:
+            # The additive-column migration below is SQLite-specific (PRAGMA
+            # table_info). A fresh Postgres database already gets the current
+            # schema straight from create_all above, so there's nothing to migrate.
+            await conn.run_sync(_run_lightweight_migrations)
 
 
 def _run_lightweight_migrations(sync_conn):
