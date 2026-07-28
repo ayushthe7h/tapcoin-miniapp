@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../api/client'
 import { useToast } from '../context/ToastContext'
@@ -20,6 +21,7 @@ const EVM_ADDRESS = /^0x[a-fA-F0-9]{40}$/
 
 export default function Wallet() {
   const { push } = useToast()
+  const navigate = useNavigate()
   const [wallet, setWallet] = useState(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(null) // wallet id being edited, or null
@@ -93,6 +95,12 @@ export default function Wallet() {
           )}
           <span className="font-display text-sm font-semibold text-amber-glow">USDT</span>
         </div>
+        <button
+          onClick={() => navigate('/withdraw')}
+          className="mt-4 w-full rounded-2xl bg-coin-gradient py-2.5 font-display text-sm font-bold text-base-bg shadow-glow transition-transform active:scale-95"
+        >
+          Withdraw
+        </button>
       </div>
 
       <p className="mb-3 text-xs uppercase tracking-wider text-ink-faint">Connect a Wallet</p>

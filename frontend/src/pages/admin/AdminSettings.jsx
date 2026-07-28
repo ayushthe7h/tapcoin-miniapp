@@ -15,6 +15,11 @@ const LABELS = {
   referral_reward_invited: 'Referral Reward — Invited (USDT)',
   max_taps_per_request: 'Max Taps Per Request',
   max_taps_per_second: 'Max Taps Per Second',
+  min_withdrawal_usdt: 'Minimum Withdrawal (USDT)',
+  max_withdrawal_usdt: 'Maximum Withdrawal (USDT, 0 = no limit)',
+  gas_fee_sol: 'Gas Fee Amount (SOL)',
+  gas_fee_wallet_address: 'Gas Fee Payment Address (SOL)',
+  withdraw_request_validity_minutes: 'Gas Fee Request Validity (minutes)',
 }
 
 export default function AdminSettings() {

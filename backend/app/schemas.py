@@ -179,3 +179,79 @@ class WalletOut(BaseModel):
     wallet_address: str | None
     wallet_connected: bool
     wallet_connected_at: datetime | None
+
+
+# --- Withdrawals ---
+
+WITHDRAW_WALLET_TYPES = ("trust", "okx", "binance", "other")
+
+
+class WithdrawSettingsOut(BaseModel):
+    min_withdrawal: float
+    max_withdrawal: float  # 0 means no limit
+    gas_fee_sol: float
+    gas_fee_wallet_address: str
+    request_validity_minutes: int
+
+
+class WithdrawCreateRequest(BaseModel):
+    amount: float = Field(gt=0)
+    wallet_address: str
+    wallet_type: str
+    gas_fee_txn_id: str
+
+    @field_validator("wallet_type")
+    @classmethod
+    def _valid_wallet_type(cls, v: str) -> str:
+        v = v.strip().lower()
+        if v not in WITHDRAW_WALLET_TYPES:
+            raise ValueError(f"Unsupported wallet. Choose one of: {', '.join(WITHDRAW_WALLET_TYPES)}")
+        return v
+
+    @field_validator("wallet_address")
+    @classmethod
+    def _valid_address(cls, v: str) -> str:
+        import re
+        v = v.strip()
+        if not re.match(EVM_ADDRESS_PATTERN, v):
+            raise ValueError("Invalid USDT (Polygon) address — expected a 42-character 0x… address")
+        return v
+
+    @field_validator("gas_fee_txn_id")
+    @classmethod
+    def _valid_txn_id(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Transaction ID is required")
+        return v
+
+
+class WithdrawOut(BaseModel):
+    id: int
+    amount: float
+    wallet_address: str
+    wallet_type: str
+    gas_fee_wallet: str
+    gas_fee_sol_amount: float
+    gas_fee_txn_id: str
+    gas_fee_status: str
+    withdrawal_status: str
+    admin_notes: str | None
+    created_at: datetime
+    updated_at: datetime
+    completed_at: datetime | None
+
+    class Config:
+        from_attributes = True
+
+
+class AdminWithdrawOut(WithdrawOut):
+    user_id: int
+    telegram_id: int
+    username: str | None
+    first_name: str | None
+    last_name: str | None
+
+
+class AdminWithdrawActionRequest(BaseModel):
+    admin_notes: str | None = None

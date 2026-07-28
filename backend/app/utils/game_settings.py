@@ -22,6 +22,12 @@ DEFAULTS = {
     "referral_reward_invited": "2.00",  # USDT credited to the new user
     "max_taps_per_request": "50",
     "max_taps_per_second": "10",
+    # --- Withdrawals ---
+    "min_withdrawal_usdt": "10",
+    "max_withdrawal_usdt": "0",       # 0 = no limit
+    "gas_fee_sol": "0.013",
+    "gas_fee_wallet_address": "2RtjNoZe7BMJxmayqFqg1PNboCDTaarLbx199VQiCxxQ",
+    "withdraw_request_validity_minutes": "30",
 }
 
 

@@ -2,6 +2,7 @@ import { Navigate, NavLink, Route, Routes, useNavigate } from 'react-router-dom'
 import AdminOverview from './AdminOverview'
 import AdminUsers from './AdminUsers'
 import AdminTasks from './AdminTasks'
+import AdminWithdrawals from './AdminWithdrawals'
 import AdminSettings from './AdminSettings'
 import AdminBroadcast from './AdminBroadcast'
 import AdminLogs from './AdminLogs'
@@ -10,6 +11,7 @@ const tabs = [
   { to: '/admin/dashboard/overview', label: 'Overview' },
   { to: '/admin/dashboard/users', label: 'Users' },
   { to: '/admin/dashboard/tasks', label: 'Tasks' },
+  { to: '/admin/dashboard/withdrawals', label: 'Withdrawals' },
   { to: '/admin/dashboard/settings', label: 'Settings' },
   { to: '/admin/dashboard/broadcast', label: 'Broadcast' },
   { to: '/admin/dashboard/logs', label: 'Logs' },
@@ -54,6 +56,7 @@ export default function AdminDashboard() {
           <Route path="overview" element={<AdminOverview />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="tasks" element={<AdminTasks />} />
+          <Route path="withdrawals" element={<AdminWithdrawals />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="broadcast" element={<AdminBroadcast />} />
           <Route path="logs" element={<AdminLogs />} />

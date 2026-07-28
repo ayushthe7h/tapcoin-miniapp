@@ -176,3 +176,29 @@ class AdminLog(Base):
     admin_username: Mapped[str] = mapped_column(String(64))
     action: Mapped[str] = mapped_column(String(256))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Withdrawal(Base):
+    __tablename__ = "withdrawals"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+
+    amount: Mapped[object] = mapped_column(USDT)
+    wallet_address: Mapped[str] = mapped_column(String(128))
+    wallet_type: Mapped[str] = mapped_column(String(32))  # trust | okx | binance | other
+
+    # Gas fee (paid by the user in SOL, off-chain from this app's perspective —
+    # we only record what the user tells us and let an admin verify it manually).
+    gas_fee_wallet: Mapped[str] = mapped_column(String(128))
+    gas_fee_sol_amount: Mapped[object] = mapped_column(USDT)
+    gas_fee_txn_id: Mapped[str] = mapped_column(String(256))
+    gas_fee_status: Mapped[str] = mapped_column(String(16), default="pending")  # pending|approved|rejected
+
+    withdrawal_status: Mapped[str] = mapped_column(String(16), default="pending")  # pending|completed|rejected
+
+    admin_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

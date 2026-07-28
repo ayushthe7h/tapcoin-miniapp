@@ -14,7 +14,10 @@ from app.models import AdminUser
 from app.utils.game_settings import ensure_defaults
 from app.utils.security import hash_password
 
-from app.routers import auth, mining, daily_reward, tasks, referral, leaderboard, profile, wallet, admin as admin_router
+from app.routers import (
+    auth, mining, daily_reward, tasks, referral, leaderboard, profile, wallet,
+    withdraw, admin as admin_router, admin_withdrawals,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("tapcoin")
@@ -41,7 +44,9 @@ app.include_router(referral.router)
 app.include_router(leaderboard.router)
 app.include_router(profile.router)
 app.include_router(wallet.router)
+app.include_router(withdraw.router)
 app.include_router(admin_router.router)
+app.include_router(admin_withdrawals.router)
 
 
 @app.on_event("startup")

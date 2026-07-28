@@ -11,6 +11,7 @@ import Tap from './pages/Tap'
 import Tasks from './pages/Tasks'
 import Referral from './pages/Referral'
 import Wallet from './pages/Wallet'
+import Withdraw from './pages/Withdraw'
 
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -52,6 +53,7 @@ function MiniApp() {
           <Route path="/tasks" element={<PageTransition><Tasks /></PageTransition>} />
           <Route path="/referral" element={<PageTransition><Referral /></PageTransition>} />
           <Route path="/wallet" element={<PageTransition><Wallet /></PageTransition>} />
+          <Route path="/withdraw" element={<PageTransition><Withdraw /></PageTransition>} />
         </Routes>
       </AnimatePresence>
       <BottomNav />
